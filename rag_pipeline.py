@@ -46,4 +46,25 @@ def create_vectorstore(text):
 
     return vectorstore
 
+from langchain_mistralai import ChatMistralAI
+
+def create_rag_chain(vectorstore):
+    llm = ChatMistralAI(model ="mistral-small-latest", temperature=0)
+
+    retriever = vectorstore.as_retriever()
+
+    def ask_question(question):
+        docs = retriever.invoke(question)
+        context = "\n".join([doc.page_content for doc in docs])
+
+        prompt = f""" Answer the question only based on given context.
+        Context : {context}
+        Question : {question}"""
+
+        response = llm.invoke(prompt)
+
+        return response.content
+    
+    return ask_question
+
 
